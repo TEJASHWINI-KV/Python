@@ -18,6 +18,15 @@
 9. [Evolution of HTTP](#9-evolution-of-http)
 10. [Master Analogy (The Town)](#10-master-analogy-the-town)
 11. [Memory Tricks Cheatsheet](#11-memory-tricks-cheatsheet)
+12. [What is REST?](#12-what-is-rest)
+13. [REST — Client & Server Separation](#13-rest--client--server-separation)
+14. [REST — Statelessness](#14-rest--statelessness)
+15. [REST Requests — Structure](#15-rest-requests--structure)
+16. [MIME Types](#16-mime-types)
+17. [REST Paths & URL Design](#17-rest-paths--url-design)
+18. [REST Response Codes](#18-rest-response-codes)
+19. [REST in Action — Full Examples](#19-rest-in-action--full-examples)
+20. [REST Memory Tricks & Quick Reference](#20-rest-memory-tricks--quick-reference)
 
 ---
 
@@ -302,6 +311,349 @@ HTTP/3    (2022) → Built on UDP instead of TCP         🛸 Blazing Fast
 4. Server replies with a **status code** (200 = found, 404 = not found) + the content
 5. **HTTP/1.0** opens a new connection per file; **HTTP/1.1** reuses one connection (faster)
 6. **HTTPS** encrypts everything so your data can't be read by snoopers
+
+---
+
+## 12. What is REST?
+
+**REST = REpresentational State Transfer**
+
+- An **architectural style** (a set of design principles) for building web services.
+- Makes it easy for computer systems to **communicate with each other** over the web.
+- Systems that follow REST rules are called **RESTful systems**.
+
+```
+Client  ──── HTTP Request ────→  RESTful Server
+Client  ←─── HTTP Response ───  RESTful Server
+```
+
+### Two Core Pillars of REST:
+1. **Separation of Client and Server**
+2. **Statelessness**
+
+> 🧠 **Memory Trick:** REST = **R**ules for **E**asy **S**ystem **T**alking
+
+> 💼 **Interview Tip:** REST is one of the most commonly asked definitions in tech interviews. Know it cold!
+
+---
+
+## 13. REST — Client & Server Separation
+
+The client and server are **completely independent** of each other.
+
+```
+Client (Frontend)          Server (Backend)
+──────────────────         ─────────────────
+React App        }         Node.js API      }  Can be changed
+Mobile App       }  ────→  Python API       }  independently
+Desktop App      }         Java API         }  without breaking
+                                               each other
+```
+
+### Why this matters:
+- You can **rebuild the entire frontend** without touching the backend.
+- You can **swap out the database** without affecting the client.
+- Multiple different clients (web, mobile, desktop) can all use the **same REST API**.
+- Each side can **evolve independently**.
+
+> 🏢 **Analogy:** A restaurant kitchen (server) and its waitstaff (client). The kitchen can change its recipes and equipment — as long as it still delivers the dishes the menu (API contract) promises, the waitstaff doesn't care.
+
+---
+
+## 14. REST — Statelessness
+
+**Stateless** = The server remembers **nothing** about the client between requests.
+
+```
+Request 1: GET /customers/123    ← Server handles it, then forgets
+Request 2: GET /orders/456       ← Server treats this as brand new
+Request 3: DELETE /customers/123 ← Server still has no memory of Request 1
+```
+
+Every request must contain **all the information** needed to process it — the server does not store session/context between calls.
+
+### Why this is good:
+| Benefit | Explanation |
+|---------|-------------|
+| **Reliability** | No session data to corrupt or lose |
+| **Scalability** | Any server in a cluster can handle any request |
+| **Performance** | Servers don't waste memory storing client state |
+
+> 🛒 **Analogy:** Like ordering at a fast food counter where the cashier has no memory of your previous visits. Every time you walk up, you give your full order from scratch. They don't assume anything.
+
+> 🧠 **Memory Trick:** **State**less = the server holds **no state** about you between requests.
+
+---
+
+## 15. REST Requests — Structure
+
+A REST request has up to **4 parts**:
+
+```
+┌─────────────────────────────────────────────┐
+│  1. HTTP Verb    →  What action to perform   │
+│  2. Header       →  Metadata about request   │
+│  3. Path         →  Where the resource lives │
+│  4. Body         →  Data to send (optional)  │
+└─────────────────────────────────────────────┘
+```
+
+### The 4 HTTP Verbs in REST:
+
+| Verb | Action | Returns on Success |
+|------|--------|-------------------|
+| `GET` | Retrieve a resource or list | `200 OK` |
+| `POST` | Create a new resource | `201 CREATED` |
+| `PUT` | Update an existing resource | `200 OK` |
+| `DELETE` | Remove a resource | `204 NO CONTENT` |
+
+> 🧠 **CRUD Memory Trick:**
+> ```
+> C → Create  → POST
+> R → Read    → GET
+> U → Update  → PUT
+> D → Delete  → DELETE
+> ```
+
+---
+
+## 16. MIME Types
+
+**MIME = Multipurpose Internet Mail Extensions**
+
+Used in request/response **headers** to tell both sides what **type of data** is being sent or expected.
+
+### Format:
+```
+type/subtype
+```
+
+### Common MIME Types:
+
+| Category | MIME Type | Used For |
+|----------|-----------|---------|
+| **Text** | `text/html` | HTML pages |
+| **Text** | `text/css` | CSS stylesheets |
+| **Text** | `text/plain` | Plain text |
+| **Image** | `image/png` | PNG images |
+| **Image** | `image/jpeg` | JPEG images |
+| **Image** | `image/gif` | GIF images |
+| **Audio** | `audio/wav` | WAV audio |
+| **Audio** | `audio/mpeg` | MP3 audio |
+| **Video** | `video/mp4` | MP4 video |
+| **App** | `application/json` | JSON data (most common in REST) |
+| **App** | `application/pdf` | PDF files |
+| **App** | `application/xml` | XML data |
+
+### How they're used in a request:
+```http
+GET /articles/23
+Accept: text/html, application/xhtml
+```
+- `Accept` header = *"I can receive these content types"* (client → server)
+- `Content-Type` header = *"Here's what I'm sending you"* (server → client)
+
+> 🧠 **Memory Trick:** MIME = **M**essage **I**dentity for **M**edia **E**xchange — it identifies what kind of media is in the message.
+
+---
+
+## 17. REST Paths & URL Design
+
+Paths tell the server **which resource** you want to act on.
+
+### Rules for good REST path design:
+
+```
+✅ Use plural nouns for resources
+✅ Use hierarchy to show relationships
+✅ Use IDs to target specific items
+❌ Don't use verbs in paths (the HTTP method IS the verb)
+```
+
+### Examples:
+
+| Path | Meaning |
+|------|---------|
+| `GET /customers` | Get ALL customers |
+| `GET /customers/223` | Get customer with id 223 |
+| `POST /customers` | Create a new customer |
+| `PUT /customers/223` | Update customer 223 |
+| `DELETE /customers/223` | Delete customer 223 |
+| `GET /customers/223/orders` | Get ALL orders for customer 223 |
+| `GET /customers/223/orders/12` | Get order 12 of customer 223 |
+
+> 🗂️ **Analogy:** Think of paths like a folder structure:
+> ```
+> /customers          ← the customers folder
+> /customers/223      ← a specific customer's file
+> /customers/223/orders/12  ← a specific order inside that customer
+> ```
+
+> 🧠 **Memory Trick:** Path = **address of the resource**. Make it so readable that anyone can guess what it does.
+
+---
+
+## 18. REST Response Codes
+
+The server always replies with a **status code** to tell the client what happened.
+
+### Full REST Status Code Reference:
+
+| Code | Name | Meaning | Triggered By |
+|------|------|---------|-------------|
+| `200` | OK | ✅ Success | GET, PUT |
+| `201` | CREATED | ✅ New resource made | POST |
+| `204` | NO CONTENT | ✅ Success, nothing to return | DELETE |
+| `400` | BAD REQUEST | ❌ Malformed/invalid request | Client sent bad data |
+| `403` | FORBIDDEN | 🚫 No permission | Not authorized |
+| `404` | NOT FOUND | ❌ Resource doesn't exist | Wrong path/id |
+| `500` | INTERNAL SERVER ERROR | 💥 Server crashed | Server-side bug |
+
+### Expected response per verb:
+```
+GET    → 200 (OK)
+POST   → 201 (CREATED)
+PUT    → 200 (OK)
+DELETE → 204 (NO CONTENT)
+```
+
+> 🧠 **Memory Trick:**
+> - **201** = **1** new thing **created** (POST always makes something new)
+> - **204** = **No** content because you just **deleted** it — nothing left to return
+> - **403** = You're **forbidden** — you exist but have no permission
+> - **404** = It **doesn't exist** at that path
+
+---
+
+## 19. REST in Action — Full Examples
+
+Using a clothing store API at `fashionboutique.com`:
+
+### GET — Retrieve All Customers
+```http
+GET http://fashionboutique.com/customers
+Accept: application/json
+```
+```http
+200 (OK)
+Content-Type: application/json
+[{ "id": 1, "name": "Alice" }, { "id": 2, "name": "Bob" }]
+```
+
+---
+
+### POST — Create a New Customer
+```http
+POST http://fashionboutique.com/customers
+Body:
+{
+  "customer": {
+    "name": "Scylla Buss",
+    "email": "scylla@example.com"
+  }
+}
+```
+```http
+201 (CREATED)
+Content-Type: application/json
+{ "id": 124, "name": "Scylla Buss", "email": "scylla@example.com" }
+```
+
+---
+
+### GET — Retrieve a Single Customer
+```http
+GET http://fashionboutique.com/customers/123
+Accept: application/json
+```
+```http
+200 (OK)
+Content-Type: application/json
+{ "id": 123, "name": "Scylla Buss", "email": "scylla@example.com" }
+```
+
+---
+
+### PUT — Update a Customer
+```http
+PUT http://fashionboutique.com/customers/123
+Body:
+{
+  "customer": {
+    "email": "newemail@example.com"
+  }
+}
+```
+```http
+200 (OK)
+```
+
+---
+
+### DELETE — Remove a Customer
+```http
+DELETE http://fashionboutique.com/customers/123
+```
+```http
+204 (NO CONTENT)
+```
+
+---
+
+## 20. REST Memory Tricks & Quick Reference
+
+| Concept | Memory Trick |
+|---------|-------------|
+| **REST** | **R**ules for **E**asy **S**ystem **T**alking |
+| **Stateless** | Server has **no memory** between requests — every call is fresh |
+| **Client/Server separation** | Kitchen & waitstaff — independent, same menu contract |
+| **GET** | *"Give me"* — retrieve |
+| **POST** | *"Here's something new"* — create |
+| **PUT** | *"Replace this"* — update |
+| **DELETE** | *"Throw it away"* — remove |
+| **200** | ✅ **2** thumbs up |
+| **201** | ✅ **1** new thing created |
+| **204** | ✅ Done, **nothing** left to return |
+| **400** | ❌ **Bad** request — your fault |
+| **403** | 🚫 **For**bidden — no permission |
+| **404** | ❌ **Not** there |
+| **500** | 💥 **S**erver broke |
+| **MIME Type** | `type/subtype` format — identifies media type |
+| **Accept header** | *"I can receive this type"* |
+| **Content-Type header** | *"I am sending this type"* |
+| **Path design** | Use plural nouns + IDs, no verbs |
+
+### REST vs Non-REST at a Glance:
+```
+❌ Non-REST path:   /getCustomer?id=123
+                    /deleteOrder?id=456
+                    /createUser
+
+✅ RESTful path:    GET    /customers/123
+                    DELETE /orders/456
+                    POST   /users
+```
+
+---
+
+## 📝 Quick Summary (30-Second Recap)
+
+### HTTP:
+1. You type a URL → browser finds the server's IP via **DNS**
+2. Browser opens a connection to the server using **TCP**
+3. Browser sends an **HTTP GET request** asking for the page
+4. Server replies with a **status code** (200 = found, 404 = not found) + the content
+5. **HTTP/1.0** opens a new connection per file; **HTTP/1.1** reuses one connection (faster)
+6. **HTTPS** encrypts everything so your data can't be read by snoopers
+
+### REST:
+1. REST is an **architectural style** — a set of rules for how APIs should be designed
+2. **Stateless** — server remembers nothing between requests
+3. **Client/Server separation** — both sides are independent
+4. Requests use **HTTP verbs** (GET/POST/PUT/DELETE) to define the action
+5. **Paths** use plural nouns and IDs to identify resources
+6. **MIME types** in headers tell both sides what data format to expect
+7. **Status codes** tell the client whether the operation succeeded or failed
 
 ---
 
